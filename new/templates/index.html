@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center mb-6">URL Shortener</h1>
+        
+        <!-- Form to shorten URL -->
+        <form id="shorten-form" class="mb-6">
+            <div class="mb-4">
+                <label for="long_url" class="block text-gray-700 text-sm font-bold mb-2">Enter Long URL:</label>
+                <input type="url" id="long_url" name="long_url" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <button type="button" id="shorten-btn"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+                Get Short URL
+            </button>
+        </form>
+
+        <div id="short-url-result" class="text-center text-green-600 font-bold mb-6 hidden">
+            Short URL: <a id="short-url-link" href="#" class="text-blue-500 underline"></a>
+        </div>
+
+        <!-- Form to redirect using short URL -->
+        <form id="redirect-form">
+            <div class="mb-4">
+                <label for="short_code" class="block text-gray-700 text-sm font-bold mb-2">Enter Short URL:</label>
+                <input type="text" id="short_code" name="short_code" required
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <button type="button" id="redirect-btn"
+                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+                Go to Long URL
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // Handle shortening URL
+        document.getElementById('shorten-btn').addEventListener('click', async () => {
+            const longUrl = document.getElementById('long_url').value;
+            const response = await fetch('/shorten', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ long_url: longUrl })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                const shortUrl = `${window.location.origin}/${data.short_code}`;
+                document.getElementById('short-url-link').href = shortUrl;
+                document.getElementById('short-url-link').textContent = shortUrl;
+                document.getElementById('short-url-result').classList.remove('hidden');
+            } else {
+                alert(data.detail || 'Error shortening URL');
+            }
+        });
+
+        // Handle redirecting to long URL
+        document.getElementById('redirect-btn').addEventListener('click', () => {
+            const shortCode = document.getElementById('short_code').value;
+            window.location.href = `/${shortCode}`;
+        });
+    </script>
+</body>
+</html>
